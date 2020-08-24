@@ -1,7 +1,7 @@
 ![Image of the licence](https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png)
 
 # Somfy Remote
-An Arduino Sketch able to emulate a Somfy remote control.
+An arduino library for emulating SomFy RTS protocol. Based on https://github.com/Nickduino/Somfy_Remote arduino sketch.
 
 
 If you want to learn more about the Somfy RTS protocol, check out [Pushtack](https://pushstack.wordpress.com/somfy-rts-protocol/).
