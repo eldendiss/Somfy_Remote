@@ -54,10 +54,10 @@ public:
     SomFy(uint8_t pin, uint32_t remoteAdd, uint16_t rollingC);
     SomFy(uint8_t pin, uint32_t remoteAdd, uint16_t rollingC, HardwareSerial *_serial);
     int send(uint8_t btn,uint8_t cnt);
-    int send(uint8_t cnt);
+    //int send(uint8_t cnt);
     int send(byte *packet, uint8_t cnt);
     void init();
-    void move(uint8_t _dir);
+    void move(dir_t _dir);
     void stop();
 };
 

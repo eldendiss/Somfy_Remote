@@ -53,7 +53,7 @@ void SomFy::init(){
 }
 
 
-/* prepPacket - prepare packet bytes
+/* prepPacket - prepare packet bytes, private
  * ARGS: uint8_t btn - button code
  * RETURNS: byte* prepared payload;
  */
@@ -167,7 +167,7 @@ void SomFy::sendPacket(byte *_payload,bool first){
  * ARGS: uint8_t cnt - # of repetitions
  * RETURNS: nonzero if succesful, zero if fails
  */
-int SomFy::send(uint8_t cnt) {
+/*int SomFy::send(uint8_t cnt) {
     if(payload==NULL||cnt<0)
         return 0;
 
@@ -178,7 +178,7 @@ int SomFy::send(uint8_t cnt) {
     }
     free(payload);      //release memory - not needed anymore
     return 1;
-}
+}*/
 
 
 /* send - send and build packet
@@ -223,7 +223,7 @@ int SomFy::send(byte *packet, uint8_t cnt) {
  * ARGS: uint8_t _dir - direction from enum dir
  * RETURNS: void
  */
-void SomFy::move(uint8_t _dir){
+void SomFy::move(dir_t _dir){
     switch(_dir){
         case DIR_UP:
             if(debug)
