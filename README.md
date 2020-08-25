@@ -1,4 +1,4 @@
-![Image of the licence](https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png)
+![Image of the license](https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png)
 
 # Somfy Remote
 An arduino library for emulating SomFy RTS protocol. Based on https://github.com/Nickduino/Somfy_Remote arduino sketch.
@@ -9,11 +9,30 @@ If you want to learn more about the Somfy RTS protocol, check out [Pushtack](htt
 
 
 **How the hardware works:**
-Connect a *433.42 Mhz* RF transmitter to Arduino Pin 5 (or change the pin in the sketch). I couldn't find a 433.*42* MHz transmitter so I hacked a remote to send my signals. I then ordered 433.42 MHz crystals to change the regular 433.92 MHz ones I have on my transmitters: that's the cheapest way to do it. Other option would be to use a tunable transmitter (but that hardly looks like the easy way and I'm not a ham radio, so...).
+Connect a *433.42 Mhz* RF transmitter to any arduino pin. If you can't find 433.*42*Mhz transmitter, it's possible to change the SAW resonator in any 433.xx Mhz transmitter. Just verify that it supports ASK/OOK modulation. If the range sucks, try upgrading antenna to 1/4 wave length (simple ~17cm straight 30AWG wire will do).
 
 
 **How the software works:**
-What you really want to keep here are the BuildFrame() and SendCommand() procedures. Input the *remote address* and the *rolling code* value and you have a remote. With the sketch, you can send the command through serial line but that would be easily modified to button press or whatever (I plan on running it on an internet-connected ESP8266 to shut the blinds at sunset every day).
 
+The rolling code value is stored in the EEPROM (at the very end), so that count won't be lost during reset/power down.
 
-The rolling code value is stored in the EEPROM, so that you don't loose count of your rolling code after a reset.
+*SomFy classname (PIN, REMOTE ADDRESS, ROLLING CODE, SERIAL PORT)*
+**PIN** - Arduino pin, to which transmitter is connected.
+**REMOTE ADDRESS** - Transmitter address to emulate
+**ROLLING CODE** - Initial value of rolling code
+**SERIAL PORT** - HardwareSerial* - Optional, library prints out debug data to provided serial port.
+
+*init()* - pin configuration, eeprom rolling code reading and opening serial port
+
+*send(BUTTON, COUNT)* - builds packet from provided BUTTON and sends it COUNT times
+**BUTTON** - which buttons to emulate. Predefined values are: C_STOP, C_MY, C_UP, C_MYUP, C_DOWN, C_MYDOWN, C_UPDOWN, C_PROG, C_SUNFLAG, C_FLAG. But you can use any custom value up to 0xFF
+**COUNT** - how many times will be the command sent
+
+*send(PACKET, COUNT)* - send provided PACKET COUNT times.
+**PACKET** - custom packet. Data type is byte*, maximum array length is 7.
+**COUNT** - how many times will be the command sent
+
+*move(DIRECTION)* - move blinds in provided direction
+**DIRECTION** - where to move: DIR_UP, DIR_DOWN, DIR_STEP_UP, DIR_STEP_DOWN and also DIR_STOP;
+
+*stop()* - stops the movement
