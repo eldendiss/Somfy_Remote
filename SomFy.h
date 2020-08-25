@@ -7,18 +7,26 @@
 #ifndef SOMFY_H
 #define SOMFY_H
 
-enum Mov{
-    Stop=1,     // Stops the movement/preffered positon
-    My=1,       // Same as stop
-    Up,         // Move up
-    MyUp,       // Set upper motor limit in initial programming mode
-    Down,       // Move down
-    MyDown,     // Set lower motor limit in initial programming mode
-    UpDown,     // Change motor limit and initial programming mode
-    Prog=8,     // Used for (de-)registering remotes
-    SunFlag,    // Enable sun and wind detector (SUN and FLAG symbol on the Telis Soliris RC)
-    Flag        // Disable sun detector (FLAG symbol on the Telis Soliris RC)
-};
+typedef enum {
+    C_STOP=1,     // Stops the movement/preffered positon
+    C_MY=1,       // Same as stop
+    C_UP,         // Move up
+    C_MYUP,       // Set upper motor limit in initial programming mode
+    C_DOWN,       // Move down
+    C_MYDOWN,     // Set lower motor limit in initial programming mode
+    C_UPDOWN,     // Change motor limit and initial programming mode
+    C_PROG=8,     // Used for (de-)registering remotes
+    C_SUNFLAG,    // Enable sun and wind detector (SUN and FLAG symbol on the Telis Soliris RC)
+    C_FLAG        // Disable sun detector (FLAG symbol on the Telis Soliris RC)
+} cmd_t;
+
+typedef enum {
+    DIR_UP=0,       //All the way up
+    DIR_STEP_UP,    //One step up
+    DIR_STEP_DOWN,  //One step down
+    DIR_DOWN,       //All the way down
+    DIR_STOP        //Stops the movement
+} dir_t;
 
 #if ARDUINO >= 100
  #include "Arduino.h"
@@ -39,15 +47,18 @@ private:
     uint16_t rollingCode=0;
     byte* payload;
     uint32_t _remoteAdd=0;
+    bool debug=0;
+    HardwareSerial *_serial;
     void sendPacket(byte *_payload,bool first);
 public:
     SomFy(uint8_t pin, uint32_t remoteAdd, uint16_t rollingC);
+    SomFy(uint8_t pin, uint32_t remoteAdd, uint16_t rollingC, HardwareSerial *_serial);
     int send(uint8_t btn,uint8_t cnt);
     int send(uint8_t cnt);
     int send(byte *packet, uint8_t cnt);
     void init();
+    void move(uint8_t _dir);
+    void stop();
 };
-
-
 
 #endif
