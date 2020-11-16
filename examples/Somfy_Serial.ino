@@ -45,7 +45,7 @@ void loop() {
       blinds.move(DIR_STEP_UP);  //Move blinds one step up
     }
     else if(recv == '-') {
-      blinds.send(DIR_STEP_DOWN);  //Move blinds one step down
+      blinds.move(DIR_STEP_DOWN);  //Move blinds one step down
     }
     else if(recv == 'p') {
       blinds.send(C_PROG,2);  //send prog command, 2 repetitions
