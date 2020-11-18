@@ -128,7 +128,7 @@ void SomFy::sendPacket(byte *_payload,bool first){
     //delay(90);    //delayMicroseconds is not accurate if delay > 16383, lets try delay instead
 
     /** hardware sync **/
-    for (int i = 0; (first?2:7); i++) {   
+    for (int i = 0; i < (first?2:7); i++) {   
         digitalWrite(_pin,1);
         delayMicroseconds(4*SYMBOL);
         digitalWrite(_pin,0);
