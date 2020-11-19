@@ -56,13 +56,13 @@ class SomFy {
      */
     void sendPacket(byte *_payload, bool first);
 
-    HardwareSerial *_serial;
+    byte *payload;
+    uint16_t _rollingCode = 0;
     const uint8_t _pin = 0;
     const uint32_t _remoteAdd = 0;
+    uint16_t _rollingCodeDefault = 0;
+    HardwareSerial *_serial;
     const uint32_t _baud = 0;
-    uint16_t _rollingC = 0;
-    uint16_t rollingCode = 0;
-    byte *payload;
 
   public:
     /**

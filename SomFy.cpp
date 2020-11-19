@@ -5,7 +5,7 @@
 SomFy::SomFy(uint8_t pin, uint32_t remoteAdd, uint16_t rollingC):
     _pin(pin),
     _remoteAdd(remoteAdd),
-    _rollingC(rollingC),
+    _rollingCodeDefault(rollingC),
     _serial(NULL) {
     pinMode(_pin, OUTPUT);   // Pin as output
     digitalWrite(_pin, 0);   // Set as low
@@ -14,7 +14,7 @@ SomFy::SomFy(uint8_t pin, uint32_t remoteAdd, uint16_t rollingC):
 SomFy::SomFy(uint8_t pin, uint32_t remoteAdd, uint16_t rollingC, HardwareSerial *serial, uint32_t baud):
     _pin(pin),
     _remoteAdd(remoteAdd),
-    _rollingC(rollingC),
+    _rollingCodeDefault(rollingC),
     _serial(serial),
     _baud(baud) {
     pinMode(_pin, OUTPUT);   // Pin as output
@@ -22,9 +22,9 @@ SomFy::SomFy(uint8_t pin, uint32_t remoteAdd, uint16_t rollingC, HardwareSerial 
 }
 
 void SomFy::init() {
-    if (EEPROM.get(SOMFY_ADDRESS, rollingCode) < _rollingC) {
-        EEPROM.put(SOMFY_ADDRESS, _rollingC);
-        rollingCode = _rollingC;
+    if (EEPROM.get(SOMFY_ADDRESS, _rollingCode) < _rollingCodeDefault) {
+        EEPROM.put(SOMFY_ADDRESS, _rollingCodeDefault);
+        _rollingCode = _rollingCodeDefault;
     }
 
     if (_serial) {
@@ -32,7 +32,7 @@ void SomFy::init() {
         _serial->print("Simulated remote number : ");
         _serial->println(_remoteAdd, HEX);
         _serial->print("Current rolling code    : ");
-        _serial->println(rollingCode);
+        _serial->println(_rollingCode);
     }
 }
 
@@ -41,12 +41,12 @@ byte *SomFy::prepPacket(uint8_t btn) {
         return NULL;
     }
 
-    EEPROM.get(SOMFY_ADDRESS, rollingCode);
+    EEPROM.get(SOMFY_ADDRESS, _rollingCode);
 
     payload[0] = 0xA7;                  // Encryption key. Doesn't matter much
     payload[1] = btn << 4;              // Which button did  you press? The 4 LSB will be the checksum
-    payload[2] = rollingCode >> 8;      // Rolling code (big endian)
-    payload[3] = rollingCode;           // Rolling code
+    payload[2] = _rollingCode >> 8;      // Rolling code (big endian)
+    payload[3] = _rollingCode;           // Rolling code
     payload[4] = _remoteAdd >> 16;      // Remote address
     payload[5] = _remoteAdd >>  8;      // Remote address
     payload[6] = _remoteAdd;            // Remote address
@@ -64,7 +64,7 @@ byte *SomFy::prepPacket(uint8_t btn) {
         payload[i] ^= payload[i - 1];
     }
 
-    EEPROM.put(SOMFY_ADDRESS, rollingCode++);
+    EEPROM.put(SOMFY_ADDRESS, _rollingCode++);
 
     if (_serial) {
         _serial->print("Payload         : ");
@@ -104,7 +104,7 @@ byte *SomFy::prepPacket(uint8_t btn) {
 
         _serial->println("");
         _serial->print("Rolling Code  : ");
-        _serial->println(rollingCode);
+        _serial->println(_rollingCode);
     }
 
     return payload;
