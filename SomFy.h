@@ -21,11 +21,11 @@ typedef enum {
 } cmd_t;
 
 typedef enum {
-    DIR_UP = 0,     //All the way up
-    DIR_STEP_UP,    //One step up
-    DIR_STEP_DOWN,  //One step down
-    DIR_DOWN,       //All the way down
-    DIR_STOP        //Stops the movement
+    DIR_UP = 0,     // All the way up
+    DIR_STEP_UP,    // One step up
+    DIR_STEP_DOWN,  // One step down
+    DIR_DOWN,       // All the way down
+    DIR_STOP        // Stops the movement
 } dir_t;
 
 #if ARDUINO >= 100
@@ -35,28 +35,96 @@ typedef enum {
 #endif
 
 #include <EEPROM.h>
-#define ADDRESS EEPROM.length()-2
-#define SYMBOL 640
+#define SOMFY_ADDRESS EEPROM.length()-2
+#define SOMFY_SYMBOL 640
 
 class SomFy {
   private:
+    /**
+     * @brief prepare packet bytes
+     *
+     * @param btn button code
+     * @return prepared payload
+     */
     byte *prepPacket(uint8_t btn);
+
+    /**
+     * @brief Sending sequence
+     *
+     * @param _payload prepared packet
+     * @param first is this 1st packet? for HW sync
+     */
+    void sendPacket(byte *_payload, bool first);
+
+    HardwareSerial *_serial;
+    bool debug = 0;
     uint8_t _pin = 0;
     uint16_t _rollingC = 0;
     uint16_t rollingCode = 0;
-    byte *payload;
     uint32_t _remoteAdd = 0;
-    bool debug = 0;
-    HardwareSerial *_serial;
-    void sendPacket(byte *_payload, bool first);
+    byte *payload;
+
   public:
+    /**
+     * @brief Construct a new SomFy object
+     * 
+     * @param pin 433.42MHz transmitter data pin
+     * @param remoteAdd simulated remote address
+     * @param rollingC value to which will be rolling code initialized
+     * (Only if its bigger than EEPROM value)
+     */
     SomFy(uint8_t pin, uint32_t remoteAdd, uint16_t rollingC);
+
+    /**
+     * @brief Construct a new SomFy object
+     *
+     * @param pin 433.42MHz transmitter data pin
+     * @param remoteAdd simulated remote address
+     * @param rollingC value to which will be rolling code initialized
+     * (Only if its bigger than EEPROM value)
+     * @param _serial HW/SW serial for debug prints
+     */
     SomFy(uint8_t pin, uint32_t remoteAdd, uint16_t rollingC, HardwareSerial *_serial);
-    int send(uint8_t btn, uint8_t cnt);
-    //int send(uint8_t cnt);
-    int send(byte *packet, uint8_t cnt);
+
+    /**
+     * @brief Hardware configuration
+     *
+     */
     void init();
+
+    /**
+     * @brief Send and build packet
+     *
+     * @param btn button command
+     * @param cnt # of repetitions
+     * @return nonzero if succesful, zero if fails
+     */
+    int send(uint8_t btn, uint8_t cnt);
+
+    // int send(uint8_t cnt);
+
+    /**
+     * @brief Send prepared packet with repetition option
+     *
+     * @param packet prepared packet
+     * @param cnt # of repetitions
+     * @return nonzero if succesful, zero if fails
+     *
+     * @note you can call both functions in one line: send(prepPacket(btn),2);
+     */
+    int send(byte *packet, uint8_t cnt);
+
+    /**
+     * @brief Move blinds in provided direction
+     *
+     * @param _dir direction from enum dir
+     */
     void move(dir_t _dir);
+
+    /**
+     * @brief stops the movement
+     *
+     */
     void stop();
 };
 
