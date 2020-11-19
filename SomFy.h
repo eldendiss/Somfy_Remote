@@ -8,56 +8,125 @@
 #define SOMFY_H
 
 typedef enum {
-    C_STOP=1,     // Stops the movement/preffered positon
-    C_MY=1,       // Same as stop
+    C_STOP = 1,   // Stops the movement/preffered positon
+    C_MY = 1,     // Same as stop
     C_UP,         // Move up
     C_MYUP,       // Set upper motor limit in initial programming mode
     C_DOWN,       // Move down
     C_MYDOWN,     // Set lower motor limit in initial programming mode
     C_UPDOWN,     // Change motor limit and initial programming mode
-    C_PROG=8,     // Used for (de-)registering remotes
+    C_PROG = 8,   // Used for (de-)registering remotes
     C_SUNFLAG,    // Enable sun and wind detector (SUN and FLAG symbol on the Telis Soliris RC)
     C_FLAG        // Disable sun detector (FLAG symbol on the Telis Soliris RC)
 } cmd_t;
 
 typedef enum {
-    DIR_UP=0,       //All the way up
-    DIR_STEP_UP,    //One step up
-    DIR_STEP_DOWN,  //One step down
-    DIR_DOWN,       //All the way down
-    DIR_STOP        //Stops the movement
+    DIR_UP = 0,     // All the way up
+    DIR_STEP_UP,    // One step up
+    DIR_STEP_DOWN,  // One step down
+    DIR_DOWN,       // All the way down
+    DIR_STOP        // Stops the movement
 } dir_t;
 
 #if ARDUINO >= 100
- #include "Arduino.h"
+    #include "Arduino.h"
 #else
- #include "WProgram.h"
+    #include "WProgram.h"
 #endif
 
 #include <EEPROM.h>
-#define ADDRESS EEPROM.length()-2
-#define SYMBOL 640
+#define SOMFY_ADDRESS EEPROM.length()-2
+#define SOMFY_SYMBOL 640
 
-class SomFy
-{
-private:
+class SomFy {
+  private:
+    /**
+     * @brief prepare packet bytes
+     *
+     * @param btn button code
+     * @return prepared payload
+     */
     byte *prepPacket(uint8_t btn);
-    uint8_t _pin=0;
-    uint16_t _rollingC=0;
-    uint16_t rollingCode=0;
-    byte* payload;
-    uint32_t _remoteAdd=0;
-    bool debug=0;
+
+    /**
+     * @brief Sending sequence
+     *
+     * @param _payload prepared packet
+     * @param first is this 1st packet? for HW sync
+     */
+    void sendPacket(byte *_payload, bool first);
+
+    byte *payload;
+    uint16_t _rollingCode = 0;
+    const uint8_t _pin = 0;
+    const uint32_t _remoteAdd = 0;
+    uint16_t _rollingCodeDefault = 0;
     HardwareSerial *_serial;
-    void sendPacket(byte *_payload,bool first);
-public:
+    const uint32_t _baud = 0;
+
+  public:
+    /**
+     * @brief Construct a new SomFy object
+     *
+     * @param pin 433.42MHz transmitter data pin
+     * @param remoteAdd simulated remote address
+     * @param rollingC value to which will be rolling code initialized
+     * (Only if its bigger than EEPROM value)
+     */
     SomFy(uint8_t pin, uint32_t remoteAdd, uint16_t rollingC);
-    SomFy(uint8_t pin, uint32_t remoteAdd, uint16_t rollingC, HardwareSerial *_serial);
-    int send(uint8_t btn,uint8_t cnt);
-    //int send(uint8_t cnt);
-    int send(byte *packet, uint8_t cnt);
+
+    /**
+     * @brief Construct a new SomFy object
+     *
+     * @param pin 433.42MHz transmitter data pin
+     * @param remoteAdd simulated remote address
+     * @param rollingC value to which will be rolling code initialized
+     * (Only if its bigger than EEPROM value)
+     * @param serial HW serial for debug prints
+     * @param baud baudrate of debuf serial port
+     */
+    SomFy(uint8_t pin, uint32_t remoteAdd, uint16_t rollingC,
+          HardwareSerial *serial, uint32_t baud = 38400);
+
+    /**
+     * @brief Hardware configuration
+     *
+     */
     void init();
+
+    /**
+     * @brief Send and build packet
+     *
+     * @param btn button command
+     * @param cnt # of repetitions
+     * @return nonzero if succesful, zero if fails
+     */
+    int send(uint8_t btn, uint8_t cnt);
+
+    // int send(uint8_t cnt);
+
+    /**
+     * @brief Send prepared packet with repetition option
+     *
+     * @param packet prepared packet
+     * @param cnt # of repetitions
+     * @return nonzero if succesful, zero if fails
+     *
+     * @note you can call both functions in one line: send(prepPacket(btn),2);
+     */
+    int send(byte *packet, uint8_t cnt);
+
+    /**
+     * @brief Move blinds in provided direction
+     *
+     * @param _dir direction from enum dir
+     */
     void move(dir_t _dir);
+
+    /**
+     * @brief stops the movement
+     *
+     */
     void stop();
 };
 

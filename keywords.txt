@@ -1,0 +1,7 @@
+SomFy	KEYWORD1
+init	KEYWORD2
+prepPacket	KEYWORD2
+sendPacket	KEYWORD2
+send	KEYWORD2
+move	KEYWORD2
+stop	KEYWORD2
