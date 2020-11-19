@@ -57,17 +57,17 @@ class SomFy {
     void sendPacket(byte *_payload, bool first);
 
     HardwareSerial *_serial;
-    bool debug = 0;
-    uint8_t _pin = 0;
+    const uint8_t _pin = 0;
+    const uint32_t _remoteAdd = 0;
+    const uint32_t _baud = 0;
     uint16_t _rollingC = 0;
     uint16_t rollingCode = 0;
-    uint32_t _remoteAdd = 0;
     byte *payload;
 
   public:
     /**
      * @brief Construct a new SomFy object
-     * 
+     *
      * @param pin 433.42MHz transmitter data pin
      * @param remoteAdd simulated remote address
      * @param rollingC value to which will be rolling code initialized
@@ -82,9 +82,11 @@ class SomFy {
      * @param remoteAdd simulated remote address
      * @param rollingC value to which will be rolling code initialized
      * (Only if its bigger than EEPROM value)
-     * @param _serial HW/SW serial for debug prints
+     * @param serial HW serial for debug prints
+     * @param baud baudrate of debuf serial port
      */
-    SomFy(uint8_t pin, uint32_t remoteAdd, uint16_t rollingC, HardwareSerial *_serial);
+    SomFy(uint8_t pin, uint32_t remoteAdd, uint16_t rollingC,
+          HardwareSerial *serial, uint32_t baud = 38400);
 
     /**
      * @brief Hardware configuration

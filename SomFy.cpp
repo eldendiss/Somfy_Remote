@@ -2,32 +2,33 @@
 
 //TODO - test
 
-SomFy::SomFy(uint8_t pin, const uint32_t remoteAdd, uint16_t rollingC) {
-    _remoteAdd = remoteAdd;
-    _pin = pin;
-    _rollingC = rollingC;
-    debug = 0;
+SomFy::SomFy(uint8_t pin, uint32_t remoteAdd, uint16_t rollingC):
+    _pin(pin),
+    _remoteAdd(remoteAdd),
+    _rollingC(rollingC),
+    _serial(NULL) {
+    pinMode(_pin, OUTPUT);   // Pin as output
+    digitalWrite(_pin, 0);   // Set as low
 }
 
-SomFy::SomFy(uint8_t pin, const uint32_t remoteAdd, uint16_t rollingC, HardwareSerial *serial) {
-    _remoteAdd = remoteAdd;
-    _pin = pin;
-    _rollingC = rollingC;
-    _serial = serial;
-    debug = 1;
+SomFy::SomFy(uint8_t pin, uint32_t remoteAdd, uint16_t rollingC, HardwareSerial *serial, uint32_t baud):
+    _pin(pin),
+    _remoteAdd(remoteAdd),
+    _rollingC(rollingC),
+    _serial(serial),
+    _baud(baud) {
+    pinMode(_pin, OUTPUT);   // Pin as output
+    digitalWrite(_pin, 0);   // Set as low
 }
 
 void SomFy::init() {
-    pinMode(_pin, 0x1);      // Pin as output
-    digitalWrite(_pin, 0);   // Set as low
-
     if (EEPROM.get(SOMFY_ADDRESS, rollingCode) < _rollingC) {
         EEPROM.put(SOMFY_ADDRESS, _rollingC);
         rollingCode = _rollingC;
     }
 
-    if (debug) {
-        _serial->begin(38400);
+    if (_serial) {
+        _serial->begin(_baud);
         _serial->print("Simulated remote number : ");
         _serial->println(_remoteAdd, HEX);
         _serial->print("Current rolling code    : ");
@@ -65,7 +66,7 @@ byte *SomFy::prepPacket(uint8_t btn) {
 
     EEPROM.put(SOMFY_ADDRESS, rollingCode++);
 
-    if (debug) {
+    if (_serial) {
         _serial->print("Payload         : ");
 
         for (byte i = 0; i < 7; i++) {
@@ -199,7 +200,7 @@ int SomFy::send(byte *packet, uint8_t cnt) {
 void SomFy::move(dir_t _dir) {
     switch (_dir) {
         case DIR_UP:
-            if (debug) {
+            if (_serial) {
                 _serial->println("UP");
             }
 
@@ -207,7 +208,7 @@ void SomFy::move(dir_t _dir) {
             break;
 
         case DIR_STEP_UP:
-            if (debug) {
+            if (_serial) {
                 _serial->println("STEP UP");
             }
 
@@ -215,7 +216,7 @@ void SomFy::move(dir_t _dir) {
             break;
 
         case DIR_STEP_DOWN:
-            if (debug) {
+            if (_serial) {
                 _serial->println("STEP DOWN");
             }
 
@@ -223,7 +224,7 @@ void SomFy::move(dir_t _dir) {
             break;
 
         case DIR_DOWN:
-            if (debug) {
+            if (_serial) {
                 _serial->println("DOWN");
             }
 
@@ -231,11 +232,7 @@ void SomFy::move(dir_t _dir) {
             break;
 
         case DIR_STOP:
-            if (debug) {
-                _serial->println("STOP");
-            }
-
-            send(prepPacket(C_STOP), 2);
+            stop();
             break;
 
         default:
@@ -244,6 +241,9 @@ void SomFy::move(dir_t _dir) {
 }
 
 void SomFy::stop() {
-    _serial->println("STOP");
+    if (_serial) {
+        _serial->println("STOP");
+    }
+
     send(prepPacket(C_STOP), 2);
 }
